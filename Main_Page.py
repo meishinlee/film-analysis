@@ -88,14 +88,15 @@ cr_pv = alt.Chart(data).mark_circle().encode(
     #     titleAnchor='middle')),
     tooltip=['genre','public_vote','count()']
 ).properties(
-    title= "How do Critic Reviews Compare to Public Reviews?",
+    title= "How do Critic Ratings Compare to Public Ratings?",
     width=200,
     height=650
 ).interactive()
 
 st.altair_chart(cr_pv, use_container_width=True)
+st.write("#### It seems like critic and public ratings tend to be fairly similar! ")
 
-
+st.write("### Let's look at the relationship between any two chosen features")
 x1 = st.selectbox('X1', data.columns, index=2)
 
 y1 =  st.selectbox('Y1',[i for i in  data.columns if i!=x1],index=3)
@@ -116,7 +117,7 @@ year_avg_vote = alt.Chart(data).mark_point().encode(
 ).interactive()
 
 st.altair_chart(year_avg_vote)
-
+st.write("#### Older movies in this dataset tend to have a varied runtime compared to recently released movies, with a majority of them running from 70 to 140 minutes ")
 
 
 
@@ -281,20 +282,26 @@ for row in topics:
     topics_set_list.append(set(topic))
     i += 1
 
+st.write("### Here are some example topics that we specifically found within our dataset")
+for i in range(3): 
+    st.write("Topic",i+1,":",topics_set_list[i])
+
 st.write("Applying jaccard distance algorithm")
 
-def jaccard_score(topic_set, desc_set):
+def jaccard_distance(topic_set, desc_set):
     intersect = len(topic_set.intersection(desc_set))
     union = len(topic_set.union(desc_set))
     return 1-intersect/union
     # return len(topic_set.intersection(desc_set))
 
 input_keywords_to_set = set(input_keyword.split())
-best_topic_score = 0
+best_topic_score = 1
 best_topics = None
 for topic in topics_set_list: 
-    if jaccard_score(topic, input_keywords_to_set) > best_topic_score: 
-        best_topic_score = jaccard_score(topic, input_keywords_to_set) 
+    # print(topic, jaccard_distance(topic, input_keywords_to_set))
+    if jaccard_distance(topic, input_keywords_to_set) < best_topic_score: 
+        # print(jaccard_distance(topic, input_keywords_to_set),best_topic_score)
+        best_topic_score = jaccard_distance(topic, input_keywords_to_set) 
         best_topics = topic
 
 st.write("Best similar topics", best_topics)
@@ -302,7 +309,7 @@ st.write("Best similar topics", best_topics)
 pq_best_titles = pq()
 # max_d = 0
 for k, v in films.items(): 
-    jd = jaccard_score(best_topics, set(v.split()))
+    jd = jaccard_distance(best_topics, set(v.split()))
     pq_best_titles.put((jd, k))
 
 num_recs = 0
