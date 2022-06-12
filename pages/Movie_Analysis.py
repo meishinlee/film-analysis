@@ -10,9 +10,10 @@ from wordcloud import ImageColorGenerator
 
 
 st.write("""
-# Title goes here
-Description here
+# Movies X Data Science
+Understanding the movies
 """)
+
 
 
 movie_ratings = pd.read_csv("datasets/filmtv_movies - ENG.csv")
@@ -41,15 +42,38 @@ data = merged.copy()
 for col in category_set:
     data[col] = data['listed_in'].apply(lambda x: 1 if col in x else 0)
 
+numerical_columns = data.select_dtypes(include=np.number).columns.tolist()
+
+st.write("### What genres are represented the most? ")
 text = " ".join(i for i in merged.listed_in)
 wordcloud = WordCloud(background_color="white").generate(text)
-
 fig, ax = plt.subplots()
 ax.imshow(wordcloud, interpolation='bilinear')
 ax.axis("off")
-
-
 st.pyplot(fig)
+
+genre_cat = st.selectbox('Genre', category_set, 'Drama')
+numerical_column = 'avg_vote'#st.selectbox('Select a numeric column', numerical_columns)
+
+output = data.groupby(genre_cat)[numerical_column].mean()
+output = output.reset_index() # can we rename the first column? 
+output[genre_cat] = output[genre_cat].apply(lambda x: "Selected genre" if x==1 else "Other genre") 
+
+
+st.write("### Let's see the average ratings for a specific genre")
+
+genre_vs_col = alt.Chart(output).mark_bar().encode(
+    x=str(genre_cat),
+    y=numerical_column,
+    tooltip = ["avg_vote"]
+).properties(
+    width=600,
+    height=500,
+    title="Average Ratings of "+str(genre_cat)+" Categorized Films vs Non "+str(genre_cat) + " Categorized Films"
+).interactive()
+
+st.altair_chart(genre_vs_col)
+
 
 cr_pv = alt.Chart(data).mark_circle().encode(
     alt.X('critics_vote', bin=True, scale=alt.Scale(zero=False)),
@@ -87,27 +111,9 @@ year_avg_vote = alt.Chart(data).mark_point().encode(
 
 st.altair_chart(year_avg_vote)
 
-numerical_columns = data.select_dtypes(include=np.number).columns.tolist()
-
-genre_cat = st.selectbox('Genre', category_set)
-numerical_column = 'avg_vote'#st.selectbox('Select a numeric column', numerical_columns)
-
-output = data.groupby(genre_cat)[numerical_column].mean()
-output = output.reset_index() # can we rename the first column? 
-output[genre_cat] = output[genre_cat].apply(lambda x: "Selected genre" if x==1 else "Other genre") 
 
 
-genre_vs_col = alt.Chart(output).mark_bar().encode(
-    x=str(genre_cat),
-    y=numerical_column,
-    tooltip = ["avg_vote"]
-).properties(
-    width=600,
-    height=500,
-    title="Average Ratings of "+str(genre_cat)+" Categorized Films vs Non "+str(genre_cat) + " Categorized Films"
-).interactive()
 
-st.altair_chart(genre_vs_col)
 
 
 df = data.groupby(by=["year", "genre"]).size().reset_index(name="counts")
