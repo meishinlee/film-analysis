@@ -1,4 +1,4 @@
-# film-analysis
+# ML X Data Science
 
 ## How to run it on your system
 1. Clone this repository 
