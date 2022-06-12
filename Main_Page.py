@@ -1,4 +1,5 @@
 
+from pickle import encode_long
 import streamlit as st
 
 import pandas as pd
@@ -67,7 +68,7 @@ genre_vs_col = alt.Chart(output).mark_bar().encode(
     y=numerical_column,
     tooltip = ["avg_vote"]
 ).properties(
-    width=600,
+    width=650,
     height=500,
     title="Average Ratings of "+str(genre_cat)+" Categorized Films vs Non "+str(genre_cat) + " Categorized Films"
 ).interactive()
@@ -79,22 +80,25 @@ cr_pv = alt.Chart(data).mark_circle().encode(
     alt.X('critics_vote', bin=True, scale=alt.Scale(zero=False)),
     alt.Y('public_vote', bin=True),
     size='count()',
-    color=alt.Color('genre', legend=alt.Legend(
-        orient='none',
-        legendX=520, legendY=0,
-        direction='vertical',
-        titleAnchor='middle')),
+    color='genre',
+    # color=alt.Color('genre', legend=alt.Legend(
+    #     orient='none',
+    #     legendX=520, legendY=0,
+    #     direction='vertical',
+    #     titleAnchor='middle')),
     tooltip=['genre','public_vote','count()']
 ).properties(
-    title= "How do Critic Reviews Compare to Public Reviews?"
+    title= "How do Critic Reviews Compare to Public Reviews?",
+    width=200,
+    height=650
 ).interactive()
 
 st.altair_chart(cr_pv, use_container_width=True)
 
 
-x1 = st.selectbox('X1', data.columns)
+x1 = st.selectbox('X1', data.columns, index=2)
 
-y1 =  st.selectbox('Y1',[i for i in  data.columns if i!=x1])
+y1 =  st.selectbox('Y1',[i for i in  data.columns if i!=x1],index=3)
 
 
 year_avg_vote = alt.Chart(data).mark_point().encode(
@@ -106,7 +110,9 @@ year_avg_vote = alt.Chart(data).mark_point().encode(
     color='genre',
     tooltip=['title','avg_vote']
 ).properties(
-    title= str(x1) + str(" vs ") + str(y1)
+    title= str(x1) + str(" vs ") + str(y1),
+    width=650,
+    height=500
 ).interactive()
 
 st.altair_chart(year_avg_vote)
@@ -123,7 +129,9 @@ genre_year = alt.Chart(data).mark_bar().encode(
     color = 'genre',
     tooltip=['year','genre','count()']
 ).properties(
-    title="Count of Records by Genre and Year"
+    title="Count of Records by Genre and Year",
+    width=650,
+    height=500
 ).interactive()
 
 st.altair_chart(genre_year)
@@ -143,13 +151,14 @@ from queue import PriorityQueue as pq
 
 import streamlit as st
 
-st.markdown("# Inclusive Movie Recommedations")
-st.sidebar.markdown("# Inclusive Movie recommendations")
+st.markdown("# Movie Recommendations")
+st.sidebar.markdown("# Movie recommendations")
 
-text = open("datasets/review_ratings.csv")
-output = open("datasets/res.txt","w")
+text = open("datasets/review_ratings.csv",encoding="utf-8")
+output = open("datasets/res.txt","w",encoding="utf-8")
 # print(text)
 text.readline() # remove header
+print(text.readline())
 for row in text: 
     row_details = row.split('^')
     title, year, genre, duration = row_details[1].strip(' ,"\''), row_details[2].strip(' ,"\''), row_details[3].strip(' ,"\''), row_details[4].strip(' ,"\'')
@@ -168,7 +177,7 @@ text.close()
 
 punc = string.punctuation
 films = {}
-text = open("datasets/review_ratings.csv")
+text = open("datasets/review_ratings.csv",encoding="utf-8")
 # print(text)
 text.readline() # remove header
 for row in text: 
