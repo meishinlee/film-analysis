@@ -11,8 +11,7 @@ from wordcloud import ImageColorGenerator
 
 
 st.write("""
-# Movies X Data Science
-Understanding the movies
+# An Analytic Approach to Popular Movie Statistics
 """)
 
 
@@ -86,7 +85,7 @@ cr_pv = alt.Chart(data).mark_circle().encode(
     #     legendX=520, legendY=0,
     #     direction='vertical',
     #     titleAnchor='middle')),
-    tooltip=['genre','public_vote','count()']
+    tooltip=['genre','critics_vote','public_vote','count()']
 ).properties(
     title= "How do Critic Ratings Compare to Public Ratings?",
     width=200,
@@ -117,7 +116,7 @@ year_avg_vote = alt.Chart(data).mark_point().encode(
 ).interactive()
 
 st.altair_chart(year_avg_vote)
-st.write("#### Older movies in this dataset tend to have a varied runtime compared to recently released movies, with a majority of them running from 70 to 140 minutes ")
+#st.write("#### Older movies in this dataset tend to have a varied runtime compared to recently released movies, with a majority of them running from 70 to 140 minutes ")
 
 
 
