@@ -102,8 +102,8 @@ genre_vs_col = alt.Chart(output).mark_bar().encode(
     y=numerical_column,
     tooltip = ["avg_vote"]
 ).properties(
-    width=400,
-    height=300,
+    width=600,
+    height=500,
     title="Average Ratings of "+str(genre_cat)+" Categorized Films vs Non "+str(genre_cat) + " Categorized Films"
 ).interactive()
 
