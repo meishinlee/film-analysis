@@ -15,7 +15,6 @@ Understanding the movies
 """)
 
 
-
 movie_ratings = pd.read_csv("datasets/filmtv_movies - ENG.csv")
 
 netflix_titles = pd.read_csv("datasets/netflix_titles_nov_2019.csv")
@@ -52,7 +51,7 @@ ax.imshow(wordcloud, interpolation='bilinear')
 ax.axis("off")
 st.pyplot(fig)
 
-genre_cat = st.selectbox('Genre', category_set)
+genre_cat = st.selectbox('Genre', category_set, index = 13 )
 numerical_column = 'avg_vote'#st.selectbox('Select a numeric column', numerical_columns)
 
 output = data.groupby(genre_cat)[numerical_column].mean()
@@ -74,27 +73,16 @@ genre_vs_col = alt.Chart(output).mark_bar().encode(
 
 st.altair_chart(genre_vs_col)
 
+st.write("The genre with highest average ratings is **Classic & Cult TV** with an average rating of", 8.40 )
 
-cr_pv = alt.Chart(data).mark_circle().encode(
-    alt.X('critics_vote', bin=True, scale=alt.Scale(zero=False)),
-    alt.Y('public_vote', bin=True),
-    size='count()',
-    color=alt.Color('genre', legend=alt.Legend(
-        orient='none',
-        legendX=520, legendY=0,
-        direction='vertical',
-        titleAnchor='middle')),
-    tooltip=['genre','public_vote','count()']
-).properties(
-    title= "How do Critic Reviews Compare to Public Reviews?"
-).interactive()
+st.write("### Scatterplot to compare any two characteristics of the movie")
 
-st.altair_chart(cr_pv, use_container_width=True)
+data = data.drop(columns = [col for col in data.columns if '_y' in col])
+x1_columns = data.columns
+x1 = st.selectbox('X1', x1_columns, index = 2)
 
-
-x1 = st.selectbox('X1', data.columns)
-
-y1 =  st.selectbox('Y1',[i for i in  data.columns if i!=x1])
+y1_columns = [i for i in  data.columns if i!=x1]
+y1 =  st.selectbox('Y1',y1_columns, index = 7)
 
 
 year_avg_vote = alt.Chart(data).mark_point().encode(
@@ -106,16 +94,36 @@ year_avg_vote = alt.Chart(data).mark_point().encode(
     color='genre',
     tooltip=['title','avg_vote']
 ).properties(
-    title= str(x1) + str(" vs ") + str(y1)
+    title= str(x1) + str(" vs ") + str(y1), 
+    width=600,
+    height=500
 ).interactive()
 
 st.altair_chart(year_avg_vote)
 
 
 
+cr_pv = alt.Chart(data).mark_circle().encode(
+    alt.X('critics_vote', bin=True, scale=alt.Scale(zero=False)),
+    alt.Y('public_vote', bin=True),
+    size='count()',
+    color='genre',
+    # color=alt.Color('genre', legend=alt.Legend(
+    #     orient='none',
+    #     legendX=520, legendY=0,
+    #     direction='vertical',
+    #     titleAnchor='middle')),
+    tooltip=['genre','public_vote','count()']
+).properties(
+    title= "How do Critic Reviews Compare to Public Reviews?",
+    width=200,
+    height=650
+).interactive()
+
+st.altair_chart(cr_pv, use_container_width=True)
 
 
-
+st.write("### Check out how the popularity of genres varies over the years")
 df = data.groupby(by=["year", "genre"]).size().reset_index(name="counts")
 genre_year = alt.Chart(data).mark_bar().encode(
     x='year',
@@ -123,7 +131,9 @@ genre_year = alt.Chart(data).mark_bar().encode(
     color = 'genre',
     tooltip=['year','genre','count()']
 ).properties(
-    title="Count of Records by Genre and Year"
+    title="Count of Records by Genre and Year", 
+    width=600,
+    height=500
 ).interactive()
 
 st.altair_chart(genre_year)
@@ -140,8 +150,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import NMF
 from sklearn.metrics.pairwise import linear_kernel
 from queue import PriorityQueue as pq
-
-import streamlit as st
 
 st.markdown("# Inclusive Movie Recommedations")
 st.sidebar.markdown("# Inclusive Movie recommendations")
@@ -274,18 +282,20 @@ for row in topics:
 
 st.write("Applying jaccard distance algorithm")
 
-def jaccard_score(topic_set, desc_set):
+def jaccard_distance(topic_set, desc_set):
     intersect = len(topic_set.intersection(desc_set))
     union = len(topic_set.union(desc_set))
     return 1-intersect/union
     # return len(topic_set.intersection(desc_set))
 
 input_keywords_to_set = set(input_keyword.split())
-best_topic_score = 0
+best_topic_score = 1
 best_topics = None
 for topic in topics_set_list: 
-    if jaccard_score(topic, input_keywords_to_set) > best_topic_score: 
-        best_topic_score = jaccard_score(topic, input_keywords_to_set) 
+    # print(topic, jaccard_distance(topic, input_keywords_to_set))
+    if jaccard_distance(topic, input_keywords_to_set) < best_topic_score: 
+        # print(jaccard_distance(topic, input_keywords_to_set),best_topic_score)
+        best_topic_score = jaccard_distance(topic, input_keywords_to_set) 
         best_topics = topic
 
 st.write("Best similar topics", best_topics)
@@ -293,7 +303,7 @@ st.write("Best similar topics", best_topics)
 pq_best_titles = pq()
 # max_d = 0
 for k, v in films.items(): 
-    jd = jaccard_score(best_topics, set(v.split()))
+    jd = jaccard_distance(best_topics, set(v.split()))
     pq_best_titles.put((jd, k))
 
 num_recs = 0
