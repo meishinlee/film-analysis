@@ -1,4 +1,5 @@
 
+from pickle import encode_long
 import streamlit as st
 
 import pandas as pd
@@ -66,7 +67,7 @@ genre_vs_col = alt.Chart(output).mark_bar().encode(
     y=numerical_column,
     tooltip = ["avg_vote"]
 ).properties(
-    width=600,
+    width=650,
     height=500,
     title="Average Ratings of "+str(genre_cat)+" Categorized Films vs Non "+str(genre_cat) + " Categorized Films"
 ).interactive()
@@ -75,6 +76,7 @@ st.altair_chart(genre_vs_col)
 
 st.write("The genre with highest average ratings is **Classic & Cult TV** with an average rating of", 8.40 )
 
+<<<<<<< HEAD
 st.write("### Scatterplot to compare any two characteristics of the movie")
 
 data = data.drop(columns = [col for col in data.columns if '_y' in col])
@@ -83,6 +85,31 @@ x1 = st.selectbox('X1', x1_columns, index = 2)
 
 y1_columns = [i for i in  data.columns if i!=x1]
 y1 =  st.selectbox('Y1',y1_columns, index = 7)
+=======
+cr_pv = alt.Chart(data).mark_circle().encode(
+    alt.X('critics_vote', bin=True, scale=alt.Scale(zero=False)),
+    alt.Y('public_vote', bin=True),
+    size='count()',
+    color='genre',
+    # color=alt.Color('genre', legend=alt.Legend(
+    #     orient='none',
+    #     legendX=520, legendY=0,
+    #     direction='vertical',
+    #     titleAnchor='middle')),
+    tooltip=['genre','public_vote','count()']
+).properties(
+    title= "How do Critic Reviews Compare to Public Reviews?",
+    width=200,
+    height=650
+).interactive()
+
+st.altair_chart(cr_pv, use_container_width=True)
+
+
+x1 = st.selectbox('X1', data.columns, index=2)
+
+y1 =  st.selectbox('Y1',[i for i in  data.columns if i!=x1],index=3)
+>>>>>>> 66a4a7e5769d406186a65cf75aa41c5bb6927297
 
 
 year_avg_vote = alt.Chart(data).mark_point().encode(
@@ -94,8 +121,13 @@ year_avg_vote = alt.Chart(data).mark_point().encode(
     color='genre',
     tooltip=['title','avg_vote']
 ).properties(
+<<<<<<< HEAD
     title= str(x1) + str(" vs ") + str(y1), 
     width=600,
+=======
+    title= str(x1) + str(" vs ") + str(y1),
+    width=650,
+>>>>>>> 66a4a7e5769d406186a65cf75aa41c5bb6927297
     height=500
 ).interactive()
 
@@ -131,8 +163,13 @@ genre_year = alt.Chart(data).mark_bar().encode(
     color = 'genre',
     tooltip=['year','genre','count()']
 ).properties(
+<<<<<<< HEAD
     title="Count of Records by Genre and Year", 
     width=600,
+=======
+    title="Count of Records by Genre and Year",
+    width=650,
+>>>>>>> 66a4a7e5769d406186a65cf75aa41c5bb6927297
     height=500
 ).interactive()
 
@@ -151,13 +188,21 @@ from sklearn.decomposition import NMF
 from sklearn.metrics.pairwise import linear_kernel
 from queue import PriorityQueue as pq
 
+<<<<<<< HEAD
 st.markdown("# Inclusive Movie Recommedations")
 st.sidebar.markdown("# Inclusive Movie recommendations")
+=======
+import streamlit as st
 
-text = open("datasets/review_ratings.csv")
-output = open("datasets/res.txt","w")
+st.markdown("# Movie Recommendations")
+st.sidebar.markdown("# Movie recommendations")
+>>>>>>> 66a4a7e5769d406186a65cf75aa41c5bb6927297
+
+text = open("datasets/review_ratings.csv",encoding="utf-8")
+output = open("datasets/res.txt","w",encoding="utf-8")
 # print(text)
 text.readline() # remove header
+print(text.readline())
 for row in text: 
     row_details = row.split('^')
     title, year, genre, duration = row_details[1].strip(' ,"\''), row_details[2].strip(' ,"\''), row_details[3].strip(' ,"\''), row_details[4].strip(' ,"\'')
@@ -176,7 +221,7 @@ text.close()
 
 punc = string.punctuation
 films = {}
-text = open("datasets/review_ratings.csv")
+text = open("datasets/review_ratings.csv",encoding="utf-8")
 # print(text)
 text.readline() # remove header
 for row in text: 
